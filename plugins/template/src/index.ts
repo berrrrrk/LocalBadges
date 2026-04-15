@@ -14,7 +14,7 @@ export default definePlugin({
         this.unpatch = after("default", BadgeList, (args, res) => {
             const user = args[0]?.user;
             // Sadece kendi profilinde çalışsın (kendi Discord ID'ni yaz)
-            if (!user || user.id !== "BURAYA_KENDI_DISCORD_ID_NI_YAZ") return res;
+            if (!user || user.id !== "1063500528258138252") return res;
 
             const badges = res?.props?.badges || [];
             
