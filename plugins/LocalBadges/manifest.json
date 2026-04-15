@@ -1,6 +1,14 @@
 {
-  "name": "LocalBadges",
-  "description": "Başkalarının rozetlerini local olarak ekler",
-  "author": "berrrrrk",
-  "main": "index.ts"
+    "name": "LocalBadges",
+    "description": "Add or change or remove your HypeSquad badge",
+    "authors": [
+        {
+            "name": "berk",
+            "id": "1063500528258138252"
+        }
+    ],
+    "main": "src/index.ts",
+    "vendetta": {
+        "icon": "ic_guild_grid_24px"
+    }
 }
