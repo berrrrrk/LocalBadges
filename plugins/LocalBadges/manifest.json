@@ -1,6 +1,6 @@
 {
   "name": "LocalBadges",
-  "description": "Sadece bana görünen rozetler",
+  "description": "Başkalarının rozetlerini local olarak ekler",
   "author": "berrrrrk",
-  "main": "index.js"
+  "main": "index.ts"
 }
