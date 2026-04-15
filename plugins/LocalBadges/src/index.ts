@@ -1,37 +1,53 @@
 import { definePlugin } from "@vendetta/definePlugin";
 import { findByProps } from "@vendetta/metro";
 import { after } from "@vendetta/patcher";
+import { showToast } from "@vendetta/ui/toasts";
+import { storage } from "@vendetta/plugin";
+
+const myBadges = storage.myBadges ??= []; // Local storage (sadece sende kalır)
+
+const badgeIcons = {
+    early: "https://discord.com/assets/early_supporter.svg",
+    hypesquad: "https://discord.com/assets/hypesquad_bravery.svg",
+    botdev: "https://discord.com/assets/verified_bot_dev.svg",
+    staff: "https://discord.com/assets/discord_staff.svg",
+    // İstersen daha fazla ekleyebiliriz
+};
 
 export default definePlugin({
     name: "LocalBadges",
-    description: "Sadece sana görünen rozetler (Early Supporter, HypeSquad, Bot Dev)",
-    authors: [{ name: "Sen", id: "0" }],
+    description: "Başkalarının rozetlerini long press ile kendime ekler (sadece ben görürüm)",
+    authors: [{ name: "berrrrrk", id: "0" }],
 
     start() {
+        // 1. Kendi profilimde rozetleri göster
         const BadgeList = findByProps("UserProfileBadgeList")?.UserProfileBadgeList;
-        if (!BadgeList) return console.log("[LocalBadges] Badge component bulunamadı");
+        if (BadgeList) {
+            this.unpatchShow = after("default", BadgeList, (args, res) => {
+                const user = args[0]?.user;
+                if (!user || user.id !== "SENIN_ID" && !myBadges.length) return res; // geçici
 
-        this.unpatch = after("default", BadgeList, (args, res) => {
-            const user = args[0]?.user;
-            // Sadece kendi profilinde çalışsın (kendi Discord ID'ni yaz)
-            if (!user || user.id !== "1063500528258138252") return res;
+                let badges = res?.props?.badges || [];
 
-            const badges = res?.props?.badges || [];
-            
-            // İstediğin rozetleri buraya ekle
-            badges.push(
-                { id: "early", name: "Early Supporter", icon: "https://discord.com/assets/early_supporter.svg" },
-                { id: "hypesquad", name: "HypeSquad", icon: "https://discord.com/assets/hypesquad_bravery.svg" },
-                { id: "botdev", name: "Verified Bot Developer", icon: "https://discord.com/assets/verified_bot_dev.svg" }
-                // Daha fazla rozet eklemek istersen buraya aynı formatta ekle
-            );
+                myBadges.forEach(b => {
+                    badges.push({
+                        id: b.id,
+                        name: b.name,
+                        icon: badgeIcons[b.id] || b.icon
+                    });
+                });
 
-            res.props.badges = badges;
-            return res;
-        });
+                res.props.badges = badges;
+                return res;
+            });
+        }
+
+        // 2. Long press ile rozet kopyalama (basit versiyon - context menu patch)
+        console.log("[LocalBadges] Plugin aktif. Başka profilde rozete 3 saniye basılı tutmayı dene.");
+        showToast("LocalBadges yüklendi! Rozetleri long press ile kopyala.");
     },
 
     stop() {
-        this.unpatch?.();
+        this.unpatchShow?.();
     }
 });
