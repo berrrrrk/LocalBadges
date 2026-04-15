@@ -1,12 +1,37 @@
-import { logger } from "@vendetta";
-import Settings from "./Settings";
+import { definePlugin } from "@vendetta/definePlugin";
+import { findByProps } from "@vendetta/metro";
+import { after } from "@vendetta/patcher";
 
-export default {
-    onLoad: () => {
-        logger.log("Hello world!");
+export default definePlugin({
+    name: "LocalBadges",
+    description: "Sadece sana görünen rozetler (Early Supporter, HypeSquad, Bot Dev)",
+    authors: [{ name: "Sen", id: "0" }],
+
+    start() {
+        const BadgeList = findByProps("UserProfileBadgeList")?.UserProfileBadgeList;
+        if (!BadgeList) return console.log("[LocalBadges] Badge component bulunamadı");
+
+        this.unpatch = after("default", BadgeList, (args, res) => {
+            const user = args[0]?.user;
+            // Sadece kendi profilinde çalışsın (kendi Discord ID'ni yaz)
+            if (!user || user.id !== "BURAYA_KENDI_DISCORD_ID_NI_YAZ") return res;
+
+            const badges = res?.props?.badges || [];
+            
+            // İstediğin rozetleri buraya ekle
+            badges.push(
+                { id: "early", name: "Early Supporter", icon: "https://discord.com/assets/early_supporter.svg" },
+                { id: "hypesquad", name: "HypeSquad", icon: "https://discord.com/assets/hypesquad_bravery.svg" },
+                { id: "botdev", name: "Verified Bot Developer", icon: "https://discord.com/assets/verified_bot_dev.svg" }
+                // Daha fazla rozet eklemek istersen buraya aynı formatta ekle
+            );
+
+            res.props.badges = badges;
+            return res;
+        });
     },
-    onUnload: () => {
-        logger.log("Goodbye, world.");
-    },
-    settings: Settings,
-}
+
+    stop() {
+        this.unpatch?.();
+    }
+});
